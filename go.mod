@@ -1,4 +1,4 @@
-module github.com/josepotalern/backdrop
+module github.com/josepmedialdea/backdrop
 
 go 1.26.1
 

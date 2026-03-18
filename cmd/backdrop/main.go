@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	imgpkg "github.com/josepotalern/backdrop/internal/image"
+	imgpkg "github.com/josepmedialdea/backdrop/internal/image"
 
-	colorpkg "github.com/josepotalern/backdrop/internal/color"
+	colorpkg "github.com/josepmedialdea/backdrop/internal/color"
 	"github.com/spf13/cobra"
 )
 
