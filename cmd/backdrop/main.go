@@ -106,25 +106,32 @@ func resolveOutput(source, output string, isEmoji bool) string {
 		return "emoji_" + cp + "_bg.png"
 	}
 
-	// For URLs, use the filename in the current working directory.
-	name := source
+	// For URLs, extract the filename and place output in cwd.
 	if strings.HasPrefix(source, "http://") || strings.HasPrefix(source, "https://") {
-		parts := strings.Split(source, "/")
-		name = parts[len(parts)-1]
-		// Strip query params.
-		if idx := strings.Index(name, "?"); idx != -1 {
-			name = name[:idx]
+		u := source
+		// Strip fragment and query params.
+		if idx := strings.Index(u, "#"); idx != -1 {
+			u = u[:idx]
 		}
+		if idx := strings.Index(u, "?"); idx != -1 {
+			u = u[:idx]
+		}
+		u = strings.TrimRight(u, "/")
+		parts := strings.Split(u, "/")
+		name := parts[len(parts)-1]
+		ext := strings.ToLower(filepath.Ext(name))
+		// Fallback if no usable image filename.
+		if name == "" || (ext != ".png" && ext != ".jpg" && ext != ".jpeg") {
+			return "image_bg.png"
+		}
+		stem := strings.TrimSuffix(name, ext)
+		return stem + "_bg" + ext
 	}
 
-	ext := filepath.Ext(name)
-	stem := strings.TrimSuffix(name, ext)
-	dir := filepath.Dir(name)
-
-	// For URLs (no directory component), use cwd.
-	if strings.HasPrefix(source, "http://") || strings.HasPrefix(source, "https://") {
-		dir = "."
-	}
+	// Local file path.
+	dir := filepath.Dir(source)
+	ext := filepath.Ext(source)
+	stem := strings.TrimSuffix(filepath.Base(source), ext)
 
 	return filepath.Join(dir, stem+"_bg"+ext)
 }
