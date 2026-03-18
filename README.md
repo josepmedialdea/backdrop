@@ -1,6 +1,25 @@
-# 🖼️ backdrop
+<!-- LOGO -->
+<h1>
+<p align="center">
+  <img src="https://em-content.zobj.net/thumbs/160/apple/391/framed-picture_1f5bc-fe0f.png" width="100px">
+  <br>backdrop
+</h1>
+  <p align="center">
+    CLI tool that fills transparent image backgrounds with a solid color.
+    <br />
+    <a href="#features">Features</a>
+    ·
+    <a href="#installation">Installation</a>
+    ·
+    <a href="#usage">Usage</a>
+    ·
+    <a href="#examples">Examples</a>
+  </p>
+</p>
 
-A CLI tool that fills transparent image backgrounds with a solid color. Supports local files, URLs, and emoji as input.
+## About
+
+backdrop takes an image with a transparent background — a local file, URL, or emoji — and fills it with a solid color.
 
 I built this to generate consistent project avatars for GitLab, but it works anywhere you need a quick, polished image with a colored background — favicons, social cards, README badges, etc.
 
