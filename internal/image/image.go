@@ -7,7 +7,6 @@ import (
 	"image/draw"
 	_ "image/jpeg"
 	"image/png"
-	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -39,7 +38,13 @@ func loadFile(path string) (image.Image, error) {
 }
 
 func loadURL(url string) (image.Image, error) {
-	resp, err := http.Get(url) //nolint:gosec
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch image: %v", err)
+	}
+	req.Header.Set("User-Agent", "backdrop/1.0")
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch image: %v", err)
 	}
@@ -49,12 +54,7 @@ func loadURL(url string) (image.Image, error) {
 		return nil, fmt.Errorf("failed to fetch image (HTTP %d)", resp.StatusCode)
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read image data: %v", err)
-	}
-
-	img, _, err := image.Decode(strings.NewReader(string(body)))
+	img, _, err := image.Decode(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("unsupported image format")
 	}
