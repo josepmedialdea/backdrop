@@ -8,6 +8,7 @@ import (
 	_ "image/jpeg"
 	"image/png"
 	"net/http"
+	"time"
 	"os"
 	"strings"
 )
@@ -44,7 +45,8 @@ func loadURL(url string) (image.Image, error) {
 	}
 	req.Header.Set("User-Agent", "backdrop/1.0")
 
-	resp, err := http.DefaultClient.Do(req)
+	client := &http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch image: %v", err)
 	}
