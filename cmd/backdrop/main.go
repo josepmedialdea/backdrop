@@ -46,8 +46,8 @@ func main() {
 }
 
 func run(source, colorStr, output string, force, square bool, padding int) error {
-	if padding < 0 {
-		return fmt.Errorf("padding must be non-negative")
+	if padding < 0 || padding > 10000 {
+		return fmt.Errorf("padding must be between 0 and 10000")
 	}
 
 	// Parse color.
