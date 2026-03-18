@@ -75,17 +75,39 @@ func HasTransparency(img image.Image) bool {
 	return false
 }
 
+// Options controls canvas adjustments applied during background fill.
+type Options struct {
+	Square  bool
+	Padding int
+}
+
 // FillBackground creates a new image with the given background color,
-// then composites the source image on top.
-func FillBackground(src image.Image, bg color.NRGBA) *image.NRGBA {
-	bounds := src.Bounds()
-	dst := image.NewNRGBA(bounds)
+// optionally squaring and/or padding the canvas, then composites the source on top.
+func FillBackground(src image.Image, bg color.NRGBA, opts Options) *image.NRGBA {
+	w := src.Bounds().Dx()
+	h := src.Bounds().Dy()
+
+	canvasW, canvasH := w, h
+	if opts.Square {
+		side := max(w, h)
+		canvasW, canvasH = side, side
+	}
+	if opts.Padding > 0 {
+		canvasW += 2 * opts.Padding
+		canvasH += 2 * opts.Padding
+	}
+
+	offsetX := (canvasW - w) / 2
+	offsetY := (canvasH - h) / 2
+
+	dst := image.NewNRGBA(image.Rect(0, 0, canvasW, canvasH))
 
 	// Fill with background color.
-	draw.Draw(dst, bounds, &image.Uniform{bg}, image.Point{}, draw.Src)
+	draw.Draw(dst, dst.Bounds(), &image.Uniform{bg}, image.Point{}, draw.Src)
 
-	// Composite source on top (alpha is respected).
-	draw.Draw(dst, bounds, src, bounds.Min, draw.Over)
+	// Composite source on top at the centered offset.
+	dstRect := image.Rect(offsetX, offsetY, offsetX+w, offsetY+h)
+	draw.Draw(dst, dstRect, src, src.Bounds().Min, draw.Over)
 
 	return dst
 }
