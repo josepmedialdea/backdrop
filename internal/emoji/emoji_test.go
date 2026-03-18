@@ -17,6 +17,9 @@ func TestIsEmoji(t *testing.T) {
 		{"http://example.com/image.png", false},
 		{"hello", false},
 		{"abc", false},
+		{"🏠home", false},
+		{"test🏠", false},
+		{"🏠House", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {

@@ -5,9 +5,10 @@ import (
 	"strings"
 )
 
-// IsEmoji returns true if the input looks like an emoji rather than a file path or URL.
-// It checks that the string is not a URL, not a file path, and contains at least one
-// rune above U+00FF (i.e., outside basic Latin and Latin-1 Supplement).
+// IsEmoji returns true if the input looks like a pure emoji string rather than
+// a file path, URL, or mixed text. It rejects URLs, file paths, and any input
+// containing ASCII letters (a-z, A-Z) to avoid ambiguity with mixed inputs
+// like "🏠home".
 func IsEmoji(s string) bool {
 	if strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "https://") {
 		return false
@@ -15,12 +16,16 @@ func IsEmoji(s string) bool {
 	if strings.ContainsAny(s, "/\\.") {
 		return false
 	}
+	hasEmoji := false
 	for _, r := range s {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') {
+			return false
+		}
 		if r > 0x00FF {
-			return true
+			hasEmoji = true
 		}
 	}
-	return false
+	return hasEmoji
 }
 
 // Codepoint converts an emoji string to lowercase dash-separated hex codepoints.
