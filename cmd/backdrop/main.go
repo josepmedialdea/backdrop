@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	colorpkg "github.com/josepmedialdea/backdrop/internal/color"
@@ -18,7 +20,7 @@ func main() {
 		output   string
 		force    bool
 		square   bool
-		padding  int
+		padding  string
 	)
 
 	rootCmd := &cobra.Command{
@@ -37,7 +39,7 @@ func main() {
 	rootCmd.Flags().StringVarP(&output, "output", "o", "", "Output file path (default: <input>_bg.<ext>)")
 	rootCmd.Flags().BoolVar(&force, "force", false, "Overwrite output file if it already exists")
 	rootCmd.Flags().BoolVar(&square, "square", false, "Make output image a perfect square")
-	rootCmd.Flags().IntVar(&padding, "padding", 0, "Add N pixels of background padding on all sides")
+	rootCmd.Flags().StringVar(&padding, "padding", "0", "Padding on all sides: pixels (e.g. 20) or percentage (e.g. 10%)")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -45,11 +47,7 @@ func main() {
 	}
 }
 
-func run(source, colorStr, output string, force, square bool, padding int) error {
-	if padding < 0 || padding > 10000 {
-		return fmt.Errorf("padding must be between 0 and 10000")
-	}
-
+func run(source, colorStr, output string, force, square bool, paddingStr string) error {
 	// Parse color.
 	bg, err := colorpkg.Parse(colorStr)
 	if err != nil {
@@ -66,6 +64,13 @@ func run(source, colorStr, output string, force, square bool, padding int) error
 
 	// Load image.
 	img, err := imgpkg.Load(loadSource)
+	if err != nil {
+		return err
+	}
+
+	// Resolve padding (needs image dimensions for percentage mode).
+	bounds := img.Bounds()
+	padding, err := parsePadding(paddingStr, bounds.Dx(), bounds.Dy())
 	if err != nil {
 		return err
 	}
@@ -94,6 +99,44 @@ func run(source, colorStr, output string, force, square bool, padding int) error
 
 	fmt.Printf("Saved: %s\n", outPath)
 	return nil
+}
+
+func parsePadding(s string, w, h int) (int, error) {
+	if s == "" {
+		return 0, fmt.Errorf("padding value must not be empty")
+	}
+
+	if strings.HasSuffix(s, "%") {
+		numStr := strings.TrimSuffix(s, "%")
+		if numStr == "" {
+			return 0, fmt.Errorf("invalid padding percentage: %q", s)
+		}
+		pct, err := strconv.ParseFloat(numStr, 64)
+		if err != nil {
+			return 0, fmt.Errorf("invalid padding percentage: %q", s)
+		}
+		if pct < 0 || pct > 100 {
+			return 0, fmt.Errorf("padding percentage must be between 0%% and 100%%")
+		}
+		shorter := w
+		if h < w {
+			shorter = h
+		}
+		px := int(math.Round(pct / 100 * float64(shorter)))
+		if px > 10000 {
+			px = 10000
+		}
+		return px, nil
+	}
+
+	px, err := strconv.Atoi(s)
+	if err != nil {
+		return 0, fmt.Errorf("invalid padding value: %q", s)
+	}
+	if px < 0 || px > 10000 {
+		return 0, fmt.Errorf("padding must be between 0 and 10000")
+	}
+	return px, nil
 }
 
 func resolveOutput(source, output string, isEmoji bool) string {
