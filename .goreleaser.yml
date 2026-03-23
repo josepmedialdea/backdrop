@@ -48,6 +48,15 @@ docker_manifests:
       - "ghcr.io/josepmedialdea/backdrop:{{ .Tag }}-amd64"
       - "ghcr.io/josepmedialdea/backdrop:{{ .Tag }}-arm64"
 
+brews:
+  - repository:
+      owner: josepmedialdea
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: https://github.com/josepmedialdea/backdrop
+    description: CLI tool that fills transparent image backgrounds with a solid color
+    license: MIT
+
 changelog:
   sort: asc
   filters:

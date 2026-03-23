@@ -32,6 +32,12 @@ I built this to generate consistent project avatars for GitLab, but it works any
 
 ## Installation
 
+### Homebrew
+
+```sh
+brew install josepmedialdea/tap/backdrop
+```
+
 ### From source
 
 ```sh
