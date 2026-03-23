@@ -53,9 +53,12 @@ brews:
       owner: josepmedialdea
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+      directory: Formula
     homepage: https://github.com/josepmedialdea/backdrop
     description: CLI tool that fills transparent image backgrounds with a solid color
     license: MIT
+    test: |
+      system "#{bin}/backdrop", "--help"
 
 changelog:
   sort: asc
